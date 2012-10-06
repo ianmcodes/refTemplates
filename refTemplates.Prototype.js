@@ -1,8 +1,8 @@
-(function ($) {
+(function () {
 	
 	var listTags = "select ul ol";
 	
-	var templateEngineName = (Mustache) ? 'mustache' : 'template';
+	var templateEngineName = (Template) ? 'template' : 'mustache';
 	var templateEngine = (Mustache) ? Mustache : {
 		render: function(template, data) {
 			var pattern = /{{(.*?)}}/;
@@ -22,8 +22,11 @@
 	}
 	
 	function apply(data, root, namespace) {
+		// if(Object.prototype.toString.call(data) != '[object Object]') {
+			// return false;
+		// }
 		var selector = (!!namespace) ? '[ref*=' + namespace + ']' : '[ref]';
-		var elements = (!!root) ? $(selector, root) : $(selector);
+		var elements = (!!root) ? $$(selector, root) : $$(selector);
 		for(var i = 0; i < elements.length; i++) {
 			var element = elements[i];
 			var refs = (element.getAttribute('ref') || '').split('|');
@@ -50,14 +53,24 @@
 		if(listTags.indexOf(element.tagName.toLowerCase()) > -1 && 
 				(Object.prototype.toString.call(value) == '[object Array]')) {
 			// use innerHTML as template and iterate over value
-			var template = element.innerHTML;
+			var template = (templateEngineName == 'template') ? new Template(element.innerHTML) : element.innerHTML;
 			var html = '';
 			for(var i = 0; i < value.length; i++) {
-				html += templateEngine.render(template, value[i]);
+				if(templateEngineName == 'template') {
+					html += template.evaluate(value[i]);
+				} else {
+					html += templateEngine.render(template, value[i]);
+				}
+			}
 			element.innerHTML = html;
 		} else if(Object.prototype.toString.call(value) == '[object Object]') {
 			// use innerHTML as template and use value on it
-			element.innerHTML = templateEngine.render(element.innerHTML, value);
+			if(templateEngineName == 'template') {
+				var template = new Template(element.innerHTML);
+				element.innerHTML = template.evaluate(value);
+			} else {
+				element.innerHTML = templateEngine.render(element.innerHTML, value);
+			}
 		} else {
 			// just put the value in the element 
 			element.innerHTML = value;
@@ -67,7 +80,7 @@
 	window.refTemplates = {
 		apply: apply
 	}
-})(jQuery);
+})()
 
 /**
  * <span ref="title">A list of {{.}}</span>

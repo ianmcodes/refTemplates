@@ -2,29 +2,28 @@
 	
 	var listTags = "select ul ol";
 	
-	var templateEngineName = (Template) ? 'template' : 'mustache';
-	var templateEngine = (Mustache) ? Mustache : {
+	var templateEngineName = (!!window.Template) ? 'template' : 'mustache';
+	var templateEngine = (!!window.Mustache) ? Mustache : {
 		render: function(template, data) {
 			var pattern = /{{(.*?)}}/;
-
-			while(var match = pattern.exec(template)) {
+			var match = pattern.exec(template);
+			while(match) {
 				var keys = match[1].split('.');
 				var value = data;
-				for(var i = 0; i < keys.length) {  // TODO: extract this into helper function
+				for(var i = 0; i < keys.length; i++) {  // TODO: extract this into helper function
 					value = value[keys[i]];
 					if(value == undefined)
 						break;
 				}
 				value = value || '';
-				template.replace(match[0],value);
+				template = template.replace(match[0],value);
+				match = pattern.exec(template);
 			}
+			return template;
 		}
 	}
 	
 	function apply(data, root, namespace) {
-		// if(Object.prototype.toString.call(data) != '[object Object]') {
-			// return false;
-		// }
 		var selector = (!!namespace) ? '[ref*=' + namespace + ']' : '[ref]';
 		var elements = (!!root) ? $$(selector, root) : $$(selector);
 		for(var i = 0; i < elements.length; i++) {

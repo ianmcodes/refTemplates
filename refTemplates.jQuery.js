@@ -2,22 +2,24 @@
 	
 	var listTags = "select ul ol";
 	
-	var templateEngineName = (Mustache) ? 'mustache' : 'template';
-	var templateEngine = (Mustache) ? Mustache : {
+	var templateEngineName = (!!window.Mustache) ? 'mustache' : 'template';
+	var templateEngine = (!!window.Mustache) ? Mustache : {
 		render: function(template, data) {
 			var pattern = /{{(.*?)}}/;
-
-			while(var match = pattern.exec(template)) {
+			var match = pattern.exec(template);
+			while(match) {
 				var keys = match[1].split('.');
 				var value = data;
-				for(var i = 0; i < keys.length) {  // TODO: extract this into helper function
+				for(var i = 0; i < keys.length; i++) {  // TODO: extract this into helper function
 					value = value[keys[i]];
 					if(value == undefined)
 						break;
 				}
 				value = value || '';
-				template.replace(match[0],value);
+				template = template.replace(match[0],value);
+				match = pattern.exec(template);
 			}
+			return template;
 		}
 	}
 	
@@ -52,7 +54,7 @@
 			// use innerHTML as template and iterate over value
 			var template = element.innerHTML;
 			var html = '';
-			for(var i = 0; i < value.length; i++) {
+			for(var i = 0; i < value.length; i++)
 				html += templateEngine.render(template, value[i]);
 			element.innerHTML = html;
 		} else if(Object.prototype.toString.call(value) == '[object Object]') {

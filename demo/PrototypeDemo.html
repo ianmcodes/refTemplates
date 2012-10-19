@@ -1,0 +1,34 @@
+<html>
+	<head>
+		<title>refTemplates: jQuery Demo</title>
+
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/prototype/1.7.1.0/prototype.js"></script>
+		<script type="text/javascript" src="../refTemplates.Prototype.js"></script>
+
+		<script type="text/javascript">
+			data = {
+				fruit : [
+				{name: 'apple', color: 'red'},
+				{name: 'orange', color: 'orange'},
+				{name: 'tomato', color: 'red'}
+				]
+			}
+			function load() {
+				refTemplates.apply(data);
+			}
+		</script>
+	</head>
+	<body onload="load();">
+		<div>
+			<select ref="fruit">
+				<option value="#{color}">#{name}</option>
+			</select>
+		</div>
+		<div>
+			<ul ref="fruit">
+				<li>#{name} (#{name.length})</li>
+			</ul>
+		</div>
+
+	</body>
+</html>
